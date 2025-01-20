@@ -1,5 +1,6 @@
 //1.Import Statements
 import { configureStore, createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { WebSocket } from "ws";
 
 //2. Define Interfaces
 interface UserState {

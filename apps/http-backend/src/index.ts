@@ -10,7 +10,7 @@ import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "@repo/backend-common/config";
-import { CreateRoomSchema, createUser, SigninSchema } from "@repo/common/types";
+import { createUser, SigninSchema, CreateRoomSchema } from "@repo/common/types";
 
 import { prismaClient } from "@repo/db/database";
 import { authMiddleware } from "./middleware";
@@ -30,12 +30,14 @@ app.post("/signup", async (req, res) => {
       return;
     }
 
-    const hashedPassword = await bcrypt.hash(parsedData.data.password, 10);
+    const { email, name, password } = req.body;
+
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const response = await prismaClient.user.create({
       data: {
-        email: parsedData.data.name,
-        name: parsedData.data.username,
+        email,
+        name,
         password: hashedPassword,
       },
     });
@@ -63,18 +65,17 @@ app.post("/signin", async (req, res) => {
       return;
     }
 
+    const { name, email, password } = req.body;
+
     const user = await prismaClient.user.findFirst({
       where: {
-        email: parsedData.data.username,
+        email,
       },
     });
 
     // Check if user exists and the password is valid
     if (user) {
-      const isPasswordValid = await bcrypt.compare(
-        parsedData.data.password,
-        user.password
-      );
+      const isPasswordValid = await bcrypt.compare(password, user.password);
 
       if (isPasswordValid) {
         //generate the jwt, here userId will be the first and user.id will be the one with which our token gets converted
@@ -178,3 +179,5 @@ app.post("/chat/:slug", async (req, res) => {
     room,
   });
 });
+
+app.listen(3001);

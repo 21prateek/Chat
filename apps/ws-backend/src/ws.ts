@@ -17,11 +17,30 @@ interface WebSocketState {
 const initialState: WebSocketState = {
   users: [],
 };
+/*It will store value like this
+ initialState= {
+  users: [
+    {
+      userId: "user1",
+      rooms: ["room1", "room2"],
+      ws: WebSocketInstance1, // Actual WebSocket object
+    },
+    {
+      userId: "user2",
+      rooms: ["room2"],
+      ws: WebSocketInstance2, // Another WebSocket object
+    }
+  ]
+}
+*/
 
 //4. Create Slice
+//createSlice:A function that accepts an initial state, an object full of reducer functions, and a "slice name", and automatically generates action creators and action types that correspond to the reducers and state.
 const wsSlice = createSlice({
   name: "websocket",
   initialState, //on which varaible or state we will start, means here initial state value is users[] which is an array of different object which contain name,roomId and ws server
+
+  //A mapping from action types to action-type-specific case reducer functions. For every action type, a matching action creator will be generated using createAction().
   reducers: {
     //action PayloadAction has type UserState interface
     addUser(state, action: PayloadAction<UserState>) {
@@ -65,6 +84,7 @@ const wsSlice = createSlice({
 });
 
 //5. Export Actions
+//Action creators for the types of actions that are handled by the slice reducer.
 export const { addUser, removeUser, joinRoom, leaveRoom } = wsSlice.actions;
 
 //6. Configure Store

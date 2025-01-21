@@ -3,7 +3,8 @@ import { JWT_SECRET } from "@repo/backend-common/config";
 import { WebSocket, WebSocketServer } from "ws";
 const wss = new WebSocketServer({ port: 8080 });
 import { prismaClient } from "@repo/db/database";
-import { addUser, joinRoom, leaveRoom, store } from "./ws";
+import { addUser, joinRoom, leaveRoom, removeUser, store } from "./ws";
+import { enqueueChat } from "./queue";
 
 function checkUser(token: string): string | null {
   try {
@@ -63,6 +64,31 @@ wss.on("connection", function connection(socket, req) {
     }
 
     if (parsedData.type === "chat") {
+      //it will pass the data to our enqueueChat which is in queue.ts and it will add our data to chat schema in form of queue
+      enqueueChat({
+        roomId: parsedData.roomId,
+        message: parsedData.message,
+        userId: userId,
+      });
+
+      // Broadcast the message to the room
+      const state = store.getState(); //It retrieves the current state of the Redux store. In Redux, the store is the central repository where the state of your entire application is stored. Using store.getState(), you can access the current state at any point in your application.It will return the current state of that redux store
+
+      //filters users who are in the chat room (parsedData.roomId).
+      state.users
+        .filter((u) => u.rooms.includes(parsedData.roomId))
+        .forEach((u) => {
+          u.ws.send(
+            JSON.stringify({
+              type: "chat",
+              message: parsedData.message,
+              roomId: parsedData.roomId,
+            })
+          );
+        });
     }
+    socket.on("close", () => {
+      store.dispatch(removeUser({ userId: userId }));
+    });
   });
 });

@@ -91,3 +91,8 @@ Leaving a Room:
 When a user leaves a room, leaveRoom is dispatched:
 dispatch(leaveRoom({ userId: "user1", roomId: "room1" }));
 The room is removed from the user's rooms array.
+
+In index.ts 
+ state = store.getState(); It retrieves the current state of the Redux store. In Redux, the store is the central repository where the state of your entire application is stored. Using store.getState(), you can access the current state at any point in your application.
+
+ When you call store.getState(), it:Returns the current state object managed by the Redux store.This state is typically structured as a single JavaScript object containing all the application's data, which is updated whenever an action is dispatched.
